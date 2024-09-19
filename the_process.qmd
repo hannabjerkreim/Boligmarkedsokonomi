@@ -1,0 +1,206 @@
+---
+title: "the_process"
+format: html
+editor: visual
+---
+
+# The Recommended Process
+
+## Recommended Process
+
+-   Do your data wrangling in R using the Tidyverse
+
+-   Prepare your map
+
+    -   In Qgis
+
+    -   In R using sf/sp
+
+-   Analysis
+
+    -   Write a reproducible document in Rmarkdown
+
+        -   RStudio 2022.07.1+554 “Spotted Wakerobin” GUI-like interface
+
+        -   Quarto Document/Presentation
+
+        -   Zotero 6/Better BibTeX integrated
+
+## Do your data wrangling in R using the Tidyverse
+
+-   Use a subdirectory relative to where your main document will reside to contain your data wrangling scripts
+
+-   If you read in raw data from files, use a subdirectory (“raw_data”) of the data directory to house your raw data files.
+
+-   If you read in the data directly via an api there is no need for a “raw_data” subdirectory
+
+-   Use a Quarto Document to document the data wrangling and make it reproducible.
+    Place this Quarto Document in your Data directory.
+
+    -   Read in the raw data at the top
+
+    -   Do your wrangling to **Tidy** data
+
+    -   Prepare an id to later link the data to a map (house id, “kommunenummer”, “grunnkretsnummer” etc.)
+
+    -   Save out your data in .Rdata and .csv (robust against time decay) formats.
+
+-   Important to get the dataset finished (as far as possible).
+    Will save us a huge amount of time and work.
+
+```{=html}
+<!-- -->
+```
+-   Check that the variables have the intended format, date, factor, character, numeric etc.
+
+-   Note the format/class of every variable so that you can read the data correctly back into R (.csv files do not have information about the format of the variables. You have to specify it when you read the data back into R).
+    If you use a .Rdata file R will know the type of each variable.
+
+-   In short: Make your raw data **Tidy** in a reproducible manner!
+
+## Prepare your map (map wrangling)
+
+-   Use a new Quarto Document to document the preparations done to your map and the merging of data to the map.
+
+-   Use a subdirectory “maps” to do your map wrangling.
+
+-   Document the source of your map, either from file or downloaded from an internet site
+
+-   Depending on the map it might be advantageous to load it into a GIS program, i.e. 
+    Qgis.
+
+-   Qgis will give you a multi layer GIS system with a GUI.
+    The advantage is an intuitive and interactive environment.
+    The drawback is a low level of reproducibility (work done in a GUI is notoriously difficult to make reproducible)
+
+-   An alternative is to use Qgis to experiment with the map and then try to do the same reproducibly in R with the tools discussed below
+
+## Prepare your map (map wrangling) cont.
+
+-   Use a new Quarto Document to document the preparations done to your map and the merging of data to the map.
+
+-   Use a subdirectory “maps” to do your map wrangling.
+
+-   Document the source of your map, either from file or downloaded from an internet site
+
+-   Depending on the map it might be advantageous to load it into a GIS program, i.e. 
+    Qgis.
+
+-   Qgis will give you a multi layer GIS system with a GUI.
+    The advantage is an intuitive and interactive environment.
+    The drawback is a low level of reproducibility (work done in a GUI is notoriously difficult to make reproducible)
+
+-   An alternative is to use Qgis to experiment with the map and then try to do the same reproducibly in R with the tools discussed below
+
+## Prepare your map (map wrangling) cont.
+
+-   Start by filter your map to the wanted area
+
+-   Fix any topological problems (this can be a real hassle)
+
+-   Check (and double check) that the ids in the map correspond with the ones in your dataset.
+
+-   Merge your dataset to the “features” (points, lines or polygons) in your map.
+    In Qgis or preferably in R.
+
+    -   use sf (not sp) as far as possible
+
+    -   <div>
+
+        > “Shifting to new visualization packages like **tmap**, **cartography**  and **mapview** should also be relativel yeasy, and use of  **sf** and the new visualization packages should certainly become standard for new research and teaching.” ([R. S. Bivand 2021](https://msb205.netlify.app/maps/process/#/references))
+
+        </div>
+
+-   Check, and double check, that the map and data is as intended.
+
+## Prepare your map (map wrangling) cont.
+
+-   Save the map in the format “GeoPackage”, the “shape” format is ancient, inconvenient (3-5 separate files) and have several technical restrictions (10 char variable names, only proj4 support etc.) ([“Shapefile Must Die!” n.d.](https://msb205.netlify.app/maps/process/#/references))
+
+## The analysis
+
+-   Read your map with the dataset into your main document
+
+-   Generate the weights matrix in R (then import to GeoDa) or make it in GeoDa
+
+-   Start with an Exploratory Data Analysis (EDA) in GeoDa
+
+-   Do descriptive statistics in R
+
+-   Test for local/global spatial autocorrelation i.e. global/local Morans I in your dependent variable.
+
+## The analysis
+
+-   If no spatial autocorrelation, do normal linear regression (or whatever)
+
+-   If spatial autocorrelation present.
+
+    -   Estimate initial linear model
+
+        -   Check for spatial effects in **residuals**
+
+        -   Our linear model *might* (not likely) be so good that no spatial effects left in the residuals.
+            If this is the case keep the plain linear model.
+
+-   If there is spatial effects in residuals.
+    We have to account for this.
+
+-   Use sf/sp and test models
+
+-   Do we have a local or global phenomenon?
+    ([James P. LeSage 2014](https://msb205.netlify.app/maps/process/#/references))
+
+    -   **Local**: Start with SDEM and test against nested models with likelihood ratio tests
+
+    -   **Global**: Start with SDM and test against nested models with likelihood ratio tests
+
+-   Thoroughly test your final spatial regression model.
+
+    -   Heteroscedasticity, normality residuals etc.
+
+## Maps for analysis/illustration
+
+-   Maps for analysis often quite terse and contains little geographical information
+
+-   Should make better/more informative maps for illustrations
+
+-   Make your illustrative maps with `tmap` or `ggplot2` in R
+
+## What we have to learn
+
+-   Short refresh Tidyverse
+
+-   How to handle maps
+
+    -   How to get them
+
+    -   How to get them into our software
+
+    -   How to edit/manipulate them
+
+    -   How to link maps and data
+
+-   How to generate neighbour structures
+
+```{=html}
+<!-- -->
+```
+-   How to make weight matrices
+
+-   How to run spatial regressions
+
+-   How to do EDA with spatial data
+
+## Before all else
+
+-   Update R
+
+-   Update R Studio
+
+-   Install the packages we will need
+
+-   Install GeoDa
+
+-   Install/update Qgis
+
+-   Update Zotero
