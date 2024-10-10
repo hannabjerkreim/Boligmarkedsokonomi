@@ -1,0 +1,195 @@
+---
+title: "lucas_county"
+format: html
+editor: visual
+---
+
+# Intro
+
+```{r}
+#| output: false
+library(Jmisc)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(sp)
+library(spdep)
+library(spatialreg)
+library(spData)
+library(modelsummary)
+library(flextable)
+library(knitr)
+# Options
+options(scipen = 7)
+```
+
+```{r}
+set.seed(42)
+lucas <- house %>% 
+  st_as_sf() %>% 
+# pick 3000 numbers from 1:25357 without replacement
+# classic solution
+#.[sample(dim(.)[1], size = 3000),]
+# tidyverse 
+  slice_sample(n = 3000)
+```
+
+```{r}
+plot(lucas["price"], cex = 0.1, pch = 20)
+```
+
+```{r}
+dim(lucas)
+```
+
+## Dataset info (R help)
+
+Data on 25,357 single family homes sold in Lucas County, Ohio, 1993-1998 from the county auditor.
+
+Formal class ‘SpatialPointsDataFrame’ \[package “sp”\] with 5 slots.
+The data slot is a data frame with 25357 observations on the following 24 variables.
+
+**price**
+
+:   a numeric vector
+
+**yrbuilt**
+
+:   a numeric vector
+
+**stories**
+
+:   a factor with levels one bilevel multilvl one+half two two+half three
+
+**TLA**
+
+:   a numeric vector
+
+**wall**
+
+:   a factor with levels stucdrvt ccbtile metlvnyl brick stone wood partbrk
+
+**beds**
+
+:   a numeric vector
+
+**baths**
+
+:   a numeric vector
+
+**halfbaths**
+
+:   a numeric vector
+
+**frontage**
+
+:   a numeric vector
+
+**depth**
+
+:   a numeric vector
+
+**garage**
+
+:   a factor with levels no garage basement attached detached carport
+
+**garagesqft**
+
+:   a numeric vector
+
+**rooms**
+
+:   a numeric vector
+
+**lotsize**
+
+:   a numeric vector
+
+**sdate**
+
+:   a numeric vector
+
+**avalue**
+
+:   a numeric vector
+
+**s1993 to s1998**
+
+:   a numeric vector
+
+**syear**
+
+:   a factor with levels 1993 1994 1995 1996 1997 1998
+
+**age**
+
+:   a numeric vector
+
+Its projection is CRS(+init=epsg:2834), the Ohio North State Plane.
+
+## Histogram of age variable
+
+```{r}
+hist(100*lucas$age, breaks = 30)
+```
+
+## From SpatialPointsDataFrame to sf
+
+```{r}
+summary(100*lucas$age)
+```
+
+```{r}
+my_age <- as.numeric(levels(lucas$syear))[as.integer(lucas$syear)] - lucas$yrbuilt
+my_age <- my_age + 3
+my_age1 <- 1999 - lucas$yrbuilt
+```
+
+```{r}
+summary(100*lucas$age - my_age)
+```
+
+```{r}
+hist(my_age1, breaks = 30)
+```
+
+```{r}
+summary(my_age1)
+```
+
+```{r}
+table(round(my_age1, 3) == round(100*lucas$age, 3))
+```
+
+## Changing the age variable
+
+```{r}
+# Trying to follow Bivand 2011, NHH Discussion Paper
+# age seems to include strange values. Turns out to be age in 1999 divided by 100
+# We calculate age at time of sale as age_sold = syear - yrbuilt
+# syear is factor, convert to numeric
+lucas$age_sold <- as.numeric(levels(lucas$syear))[as.integer(lucas$syear)] - lucas$yrbuilt
+# Scale age_sold by dividing by 100
+lucas$age_sold <- lucas$age_sold/100
+```
+
+## Running the first model
+
+```{r}
+# define the model
+hmod1 <- "I(log(price)) ~ I(age_sold) + I(age_sold^2) + 
+I(age_sold^3) + I(log(TLA)) + I(log(lotsize)) + rooms + beds + syear"
+```
+
+```{r}
+# put result in lm1
+lm1 <- lm(hmod1, data = lucas)
+```
+
+```{r}
+summary(lm1)
+```
+
+```{r}
+save(lucas, hmod1, lm1, file = "lucas.RData")
+```
