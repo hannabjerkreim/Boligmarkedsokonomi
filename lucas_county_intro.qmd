@@ -1,5 +1,5 @@
 ---
-title: "lucas_county"
+title: "lucas_county_intro"
 format: html
 editor: visual
 ---
@@ -188,8 +188,4 @@ lm1 <- lm(hmod1, data = lucas)
 
 ```{r}
 summary(lm1)
-```
-
-```{r}
-save(lucas, hmod1, lm1, file = "lucas.RData")
 ```
