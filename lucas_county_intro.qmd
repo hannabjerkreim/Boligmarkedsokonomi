@@ -189,3 +189,9 @@ lm1 <- lm(hmod1, data = lucas)
 ```{r}
 summary(lm1)
 ```
+
+```{r}
+k_5_nearest <- knearneigh(lucas, k = 5)
+nb <- knn2nb(k_5_nearest)
+lucas_w <- nb2listw(nb, style = "W")
+```

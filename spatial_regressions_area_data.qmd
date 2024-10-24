@@ -1,0 +1,30 @@
+---
+title: "spatial_regressions_area_data"
+format: html
+editor: visual
+---
+
+# Spatial Regressions Area Data
+
+```{r}
+library(PxWebApiData)
+library(tidyverse)
+library(readxl)
+library(sf)
+library(sp)
+library(spdep)
+library(spatialreg)
+library(broom)
+library(mctest)
+library(huxtable)
+library(tmap)
+```
+
+## Read in data via map
+
+This is the municipalities map with data from SSB generated under [Getting Data](https://msb205.netlify.app/spatmetrics/data/).
+
+```{r}
+# run data/get_ssb_data.Rmd if data needs to be updated
+map_data_2017 <- st_read(dsn = "../data/map_data_2017.gpkg")
+```

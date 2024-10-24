@@ -1,0 +1,49 @@
+---
+title: "lucas_county_global"
+format: html
+editor: visual
+---
+
+```{r}
+#| output: false
+library(Jmisc)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(sp)
+library(spdep)
+library(spatialreg)
+library(spData)
+library(modelsummary)
+library(flextable)
+library(knitr)
+# Options
+options(scipen = 7)
+```
+
+# Global Phenomena
+
+```{r}
+load("lucas.Rdata")
+# need SLX from local
+load("models-local.RData")
+```
+
+Spataial Durban Model: koeffisientene skal ikke tolkes!
+Impacts skal tolkes - direkte, indirekte, total
+
+**SLX**
+
+```{r}
+
+```
+
+```{r}
+summary(SLX)
+```
+
+Koeffisientene skal tolkes.
+
+**SAR**
+
+impacts!

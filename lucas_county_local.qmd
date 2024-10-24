@@ -1,0 +1,133 @@
+---
+title: "lucas_county_local"
+format: html
+editor: visual
+---
+
+```{r}
+library(Jmisc)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(sp)
+library(spdep)
+library(spatialreg)
+library(spData)
+library(modelsummary)
+library(flextable)
+library(knitr)
+# Options
+options(scipen = 7)
+```
+
+# Local Phenomena
+
+```{r}
+# objects defined in intro.qmd
+load("lucas.RData")
+```
+
+## Generate neighbour structure
+
+Model used
+
+```{r}
+cat(hmod1)
+```
+
+```{r}
+# lucas_w was generated in the into.qmd file
+lucas_w
+```
+
+## Moran Plot
+
+```{r}
+moran.plot(log(lucas$price), listw = lucas_w, labels = FALSE, pch = 20, cex = 0.3)
+```
+
+## Moran Plot; influential obs.
+
+-   If we want to see which obs.
+    are the most influential we can change labels to TRUE
+
+-   The row number for each influential obs.
+    will then be plotted in the figure.
+
+```{r}
+moran.plot(lucas$age_sold, listw = lucas_w, 
+           labels = TRUE, pch = 20, cex = 0.3)
+```
+
+## Approximate profile-likelihood estimator (APLE)
+
+Approximate profile-likelihood estimator (APLE), see Li, Calder, and Cressie ([2007](https://msb205.netlify.app/spatmetrics/lucascounty/local#/references)) and Li, Calder, and Cressie ([2012](https://msb205.netlify.app/spatmetrics/lucascounty/local#/references)).
+
+```{r}
+# Calculate APLE for the variables
+lucas %>% 
+  select(price, age_sold, TLA, lotsize, rooms, beds) %>% 
+  st_set_geometry(., NULL) %>% 
+  demean() %>% 
+  as_tibble() %>% 
+  map(aple,listw = lucas_w) |> 
+  unlist()
+```
+
+## Conclusion APLE
+
+-   We see that the strength of positive spatial dependence is greatest for `price`, `TLA` and `lotsize` and lowest for number of bedrooms (`beds`) in the dwellings.
+
+-   APLE, which may be viewed somewhat like a correlation coefficient between the values observed for each state and the average values for neighbouring states.([R. Bivand, Millo, and Piras 2021a](https://msb205.netlify.app/spatmetrics/lucascounty/local#/references))
+
+## Local phenomena; model list
+
+-   SDEM,
+
+    -   `SDEM <- errorsarlm(hmod1, data = lucas, listw = lucas_w,  Durbin = TRUE, na.action = na.omit)`
+
+-   SEM,
+
+    -   `SEM <- errorsarlm(hmod1, data = lucas, listw = lucas_w,  Durbin = FALSE, na.action = na.omit)`
+
+-   SLX,
+
+    -   `SLX <- lmSLX(hmod1, data = lucas, listw = lucas_w, Durbin = TRUE, na.action = na.omit)`
+
+-   lm (OLS)
+
+    -   `lm1 <- lm()`
+
+## Local, start with SDEM
+
+-   Some of these models are quite expensive to compute, so we cache the results
+
+    -   It should automagically be recomputed if something change
+
+-   But caching is complex so we should check that the models really are recomputed if we change the data or model
+
+-   Note the use of the option `Durbin` to choose the kind of model.
+
+    -   Used to be done by the options `type` and `etype` until recently.
+
+```{r}
+SDEM <- errorsarlm(hmod1, data = lucas, listw = lucas_w, 
+                   Durbin = TRUE, na.action = na.omit)
+```
+
+```{r}
+summary(impacts(SDEM), zstats = TRUE)
+```
+
+## Local, SEM
+
+```{r}
+# No spatial effects in the explanatory variables
+SEM <- errorsarlm(hmod1, data = lucas, listw = lucas_w, 
+                  Durbin = FALSE, na.action = na.omit)
+```
+
+```{r}
+# normal summary, no impacts
+summary(SEM)
+```
